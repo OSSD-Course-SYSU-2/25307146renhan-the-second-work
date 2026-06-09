@@ -10,9 +10,10 @@ interface TrashGame_Params {
 interface StoryLine {
     text: string;
     speaker: string;
-    bgImage: string; // 背景图资源名
-    characterImage: string; // 立绘资源名
-    isCenter: boolean; // 立绘是否居中
+    bgImage: string;
+    characterImage: string;
+    isCenter: boolean;
+    hasChoice: boolean;
 }
 class TrashGame extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
@@ -22,28 +23,71 @@ class TrashGame extends ViewPU {
         }
         this.__currentIndex = new ObservedPropertySimplePU(0, this, "currentIndex");
         this.timerId = -1;
-        this.__countdown = new ObservedPropertySimplePU(5, this, "countdown");
+        this.__countdown = new ObservedPropertySimplePU(2, this, "countdown");
         this.story = [
             {
                 text: "雪怪：我是snow monster。",
                 speaker: "雪怪",
                 bgImage: "corn",
                 characterImage: "snow",
-                isCenter: true
+                isCenter: true,
+                hasChoice: false
             },
             {
                 text: "我爱吃大玉米棒子",
                 speaker: "雪怪",
                 bgImage: "corn",
                 characterImage: "snow",
-                isCenter: true
+                isCenter: true,
+                hasChoice: false
             },
             {
                 text: "好吃。",
                 speaker: "雪怪",
                 bgImage: "corn",
                 characterImage: "snow",
-                isCenter: true
+                isCenter: true,
+                hasChoice: false
+            },
+            {
+                text: "如果你给我吃玉米的话。我就认你当老大。",
+                speaker: "雪怪",
+                bgImage: "corn",
+                characterImage: "snow",
+                isCenter: true,
+                hasChoice: false
+            },
+            {
+                text: "老大再给一根玉米好不好",
+                speaker: "雪怪",
+                bgImage: "corn",
+                characterImage: "snow",
+                isCenter: true,
+                hasChoice: true
+            },
+            {
+                text: "雪怪：我很生气！",
+                speaker: "雪怪",
+                bgImage: "corn",
+                characterImage: "snow3",
+                isCenter: true,
+                hasChoice: false
+            },
+            {
+                text: "雪怪：谢谢老大！老大真好！",
+                speaker: "雪怪",
+                bgImage: "corn",
+                characterImage: "snow",
+                isCenter: true,
+                hasChoice: false
+            },
+            {
+                text: "吃完玉米我变得更帅了",
+                speaker: "雪怪",
+                bgImage: "corn",
+                characterImage: "snow1",
+                isCenter: true,
+                hasChoice: false
             }
         ];
         this.setInitiallyProvidedValue(params);
@@ -75,7 +119,6 @@ class TrashGame extends ViewPU {
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
-    // 1. 定义当前剧情索引
     private __currentIndex: ObservedPropertySimplePU<number>;
     get currentIndex() {
         return this.__currentIndex.get();
@@ -83,9 +126,7 @@ class TrashGame extends ViewPU {
     set currentIndex(newValue: number) {
         this.__currentIndex.set(newValue);
     }
-    // 定时器ID
     private timerId: number;
-    // 倒计时显示
     private __countdown: ObservedPropertySimplePU<number>;
     get countdown() {
         return this.__countdown.get();
@@ -93,36 +134,40 @@ class TrashGame extends ViewPU {
     set countdown(newValue: number) {
         this.__countdown.set(newValue);
     }
-    // 2. 定义你的“垃圾”剧本（在这里加剧情）
     private story: StoryLine[];
-    // 自动跳转到下一个对话
     private autoNextDialogue(): void {
         if (this.currentIndex < this.story.length - 1) {
             this.currentIndex++;
             console.log('自动跳转到下一个对话,新索引:', this.currentIndex);
         }
         else {
-            // 循环播放,重新开始
-            this.currentIndex = 0;
-            console.log('自动重新开始,索引重置为0');
+            this.stopTimer();
+            console.log('剧情播放结束');
         }
     }
-    // 启动定时器
+    private giveCorn(): void {
+        this.currentIndex = 6;
+        this.stopTimer();
+        this.startTimer();
+    }
+    private refuseCorn(): void {
+        this.currentIndex = 5;
+        this.stopTimer();
+    }
     private startTimer(): void {
         if (this.timerId === -1) {
-            this.countdown = 5; // 重置倒计时
+            this.countdown = 2;
             this.timerId = setInterval(() => {
                 this.countdown--;
                 console.log('倒计时:', this.countdown);
                 if (this.countdown <= 0) {
                     this.autoNextDialogue();
-                    this.countdown = 5; // 重置倒计时
+                    this.countdown = 2;
                 }
-            }, 1000); // 每秒更新一次
+            }, 1000);
             console.log('定时器已启动,5秒后自动跳转');
         }
     }
-    // 停止定时器
     private stopTimer(): void {
         if (this.timerId !== -1) {
             clearInterval(this.timerId);
@@ -143,38 +188,33 @@ class TrashGame extends ViewPU {
             Stack.height('100%');
         }, Stack);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            // 3. 背景层
             Image.create({ get id() {
                     return typeof __getResourceId__ === "function" ? __getResourceId__(this) : -1;
                 }, "type": -1, params: ['app.media.' + this.story[this.currentIndex].bgImage], "bundleName": "com.example.myapplication", "moduleName": "entry" });
-            // 3. 背景层
             Image.width('100%');
-            // 3. 背景层
             Image.height('100%');
-            // 3. 背景层
             Image.objectFit(ImageFit.Cover);
         }, Image);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
-            // 4. 立绘层 (根据剧本显示)
             if (this.story[this.currentIndex].characterImage !== "") {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Image.create({ get id() {
                                 return typeof __getResourceId__ === "function" ? __getResourceId__(this) : -1;
                             }, "type": -1, params: ['app.media.' + this.story[this.currentIndex].characterImage], "bundleName": "com.example.myapplication", "moduleName": "entry" });
-                        Image.width(300);
-                        Image.height(500);
+                        Image.width('85%');
+                        Image.height('88%');
+                        Image.objectFit(ImageFit.Contain);
                         Image.position({
                             x: '50%',
-                            y: '20%'
+                            y: '10%'
                         });
                         Image.translate({ x: '-50%' });
                         Image.transition({ type: TransitionType.All, opacity: 1.0, scale: { x: 1.0, y: 1.0 } });
                     }, Image);
                 });
             }
-            // 5. 对话框层 (底部)
             else {
                 this.ifElseBranchUpdateFunction(1, () => {
                 });
@@ -182,16 +222,11 @@ class TrashGame extends ViewPU {
         }, If);
         If.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            // 5. 对话框层 (底部)
             Column.create();
-            // 5. 对话框层 (底部)
             Column.width('100%');
-            // 5. 对话框层 (底部)
-            Column.height(200);
-            // 5. 对话框层 (底部)
+            Column.height('25%');
             Column.backgroundColor('rgba(0, 0, 0, 0.8)');
-            // 5. 对话框层 (底部)
-            Column.position({ x: 0, y: '80%' });
+            Column.position({ x: 0, y: '75%' });
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
@@ -199,30 +234,71 @@ class TrashGame extends ViewPU {
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create(this.story[this.currentIndex].speaker);
-            Text.fontSize(24);
+            Text.fontSize({ "id": 16777233, "type": 10002, params: [], "bundleName": "com.example.myapplication", "moduleName": "entry" });
             Text.fontWeight(FontWeight.Bold);
             Text.fontColor('#ff0000');
             Text.layoutWeight(1);
-            Text.margin({ left: 20, top: 20 });
+            Text.margin({ left: '3%', top: '2%' });
         }, Text);
         Text.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create(`${this.countdown}s`);
-            Text.fontSize(20);
+            Text.fontSize({ "id": 16777232, "type": 10002, params: [], "bundleName": "com.example.myapplication", "moduleName": "entry" });
             Text.fontColor('#FFFF00');
-            Text.margin({ right: 20, top: 20 });
+            Text.margin({ right: '3%', top: '2%' });
         }, Text);
         Text.pop();
         Row.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create(this.story[this.currentIndex].text);
-            Text.fontSize(18);
+            Text.fontSize({ "id": 16777234, "type": 10002, params: [], "bundleName": "com.example.myapplication", "moduleName": "entry" });
             Text.fontColor('#ffffff');
             Text.alignSelf(ItemAlign.Start);
-            Text.margin({ left: 20, top: 10, right: 20 });
+            Text.margin({ left: '3%', top: '1%', right: '3%' });
         }, Text);
         Text.pop();
-        // 5. 对话框层 (底部)
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            If.create();
+            if (this.story[this.currentIndex].hasChoice) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Row.create();
+                        Row.margin({ top: '1%' });
+                    }, Row);
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Button.createWithLabel('给玉米');
+                        Button.fontSize({ "id": 16777231, "type": 10002, params: [], "bundleName": "com.example.myapplication", "moduleName": "entry" });
+                        Button.backgroundColor('#ff9900');
+                        Button.fontColor('#ffffff');
+                        Button.width('30%');
+                        Button.height({ "id": 16777230, "type": 10002, params: [], "bundleName": "com.example.myapplication", "moduleName": "entry" });
+                        Button.margin({ right: '3%' });
+                        Button.onClick(() => {
+                            this.giveCorn();
+                        });
+                    }, Button);
+                    Button.pop();
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Button.createWithLabel('不给');
+                        Button.fontSize({ "id": 16777231, "type": 10002, params: [], "bundleName": "com.example.myapplication", "moduleName": "entry" });
+                        Button.backgroundColor('#ff3333');
+                        Button.fontColor('#ffffff');
+                        Button.width('30%');
+                        Button.height({ "id": 16777230, "type": 10002, params: [], "bundleName": "com.example.myapplication", "moduleName": "entry" });
+                        Button.onClick(() => {
+                            this.refuseCorn();
+                        });
+                    }, Button);
+                    Button.pop();
+                    Row.pop();
+                });
+            }
+            else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                });
+            }
+        }, If);
+        If.pop();
         Column.pop();
         Stack.pop();
     }

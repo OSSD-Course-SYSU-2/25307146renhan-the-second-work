@@ -3,6 +3,26 @@
     {
       "name": "page_text_font_size",
       "value": "50fp"
+    },
+    {
+      "name": "speaker_size",
+      "value": "24fp"
+    },
+    {
+      "name": "countdown_size",
+      "value": "20fp"
+    },
+    {
+      "name": "text_size",
+      "value": "18fp"
+    },
+    {
+      "name": "btn_text_size",
+      "value": "16fp"
+    },
+    {
+      "name": "btn_height",
+      "value": "40fp"
     }
   ]
 }

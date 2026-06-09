@@ -55,5 +55,37 @@
 			"type":	"media",
 			"name":	"corn",
 			"id":	"0x0100000D"
+		}, {
+			"type":	"float",
+			"name":	"btn_height",
+			"id":	"0x0100000E"
+		}, {
+			"type":	"float",
+			"name":	"btn_text_size",
+			"id":	"0x0100000F"
+		}, {
+			"type":	"float",
+			"name":	"countdown_size",
+			"id":	"0x01000010"
+		}, {
+			"type":	"float",
+			"name":	"speaker_size",
+			"id":	"0x01000011"
+		}, {
+			"type":	"float",
+			"name":	"text_size",
+			"id":	"0x01000012"
+		}, {
+			"type":	"media",
+			"name":	"snow1",
+			"id":	"0x01000013"
+		}, {
+			"type":	"media",
+			"name":	"snow2",
+			"id":	"0x01000014"
+		}, {
+			"type":	"media",
+			"name":	"snow3",
+			"id":	"0x01000015"
 		}]
 }
