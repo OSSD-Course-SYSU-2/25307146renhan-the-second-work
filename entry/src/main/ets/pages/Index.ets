@@ -12,7 +12,7 @@ interface StoryLine {
 struct TrashGame {
   @State currentIndex: number = 0;
   private timerId: number = -1;
-  @State countdown: number = 2;
+  @State countdown: number = 4;
 
   private story: StoryLine[] = [
     {
@@ -105,13 +105,13 @@ struct TrashGame {
 
   private startTimer(): void {
     if (this.timerId === -1) {
-      this.countdown = 2;
+      this.countdown = 4;
       this.timerId = setInterval(() => {
         this.countdown--;
         console.log('倒计时:', this.countdown);
         if (this.countdown <= 0) {
           this.autoNextDialogue();
-          this.countdown = 2;
+          this.countdown = 4;
         }
       }, 1000);
       console.log('定时器已启动,5秒后自动跳转');
@@ -200,6 +200,21 @@ struct TrashGame {
               })
           }
           .margin({ top: '1%' })
+        }
+
+        if (this.currentIndex === 5 || this.currentIndex === 7) {
+          Button('重新开始')
+            .fontSize($r('app.float.btn_text_size'))
+            .backgroundColor('#4CAF50')
+            .fontColor('#ffffff')
+            .width('40%')
+            .height($r('app.float.btn_height'))
+            .margin({ top: '1%' })
+            .onClick(() => {
+              this.currentIndex = 0;
+              this.stopTimer();
+              this.startTimer();
+            })
         }
       }
       .width('100%')
